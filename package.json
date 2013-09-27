@@ -1,0 +1,27 @@
+{
+  "name": "shared-mutex",
+  "version": "0.0.0",
+  "description": "Mutex that is shared using a redis instance",
+  "main": "shared_mutex.js",
+  "private": true,
+  "scripts": {
+    "test": "make"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mozilla-b2g-bot/shared_mutex.git"
+  },
+  "author": "John Ford",
+  "license": "Apache2",
+  "bugs": {
+    "url": "https://github.com/mozilla-b2g-bot/shared_mutex/issues"
+  },
+  "dependencies": {
+    "debug": "~0.7.2",
+    "redis": "~0.8.4",
+    "hiredis": "~0.1.15"
+  },
+  "devDependencies": {
+    "mocha": "~1.12.1"
+  }
+}
