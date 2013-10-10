@@ -15,7 +15,7 @@ suite('shared_mutex', function() {
     subject.lock(null, id, null, function(err, data) {
       assert.ifError(err);
       assert.equal(id, data);
-      return done(err);
+      done(err);
     });
   });
 
@@ -28,7 +28,7 @@ suite('shared_mutex', function() {
         function(unlockErr, unlockData) {
           assert.ifError(unlockErr);
           assert.equal(id, unlockData);
-          return done(unlockErr);
+          done(unlockErr);
         }
         );
     });
@@ -59,7 +59,7 @@ suite('shared_mutex', function() {
           subject.unlock(null, unlockData, function(err, data) {
             assert.ifError(err);
             assert.equal(id, data);
-            return done(err);
+            done(err);
           });
         }
         );
