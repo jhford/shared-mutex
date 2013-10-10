@@ -4,7 +4,7 @@ var redis = require('redis');
 
 suite('shared_mutex', function() {
 
-  var subject = require('../shared_mutex');
+  var subject = require('../lib/shared_mutex');
 
   setup(function() {
     redis.createClient().flushall();

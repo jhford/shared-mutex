@@ -2,7 +2,7 @@
   "name": "shared-mutex",
   "version": "0.0.0",
   "description": "Mutex that is shared using a redis instance",
-  "main": "shared_mutex.js",
+  "main": "lib/shared_mutex.js",
   "private": true,
   "scripts": {
     "test": "make"
