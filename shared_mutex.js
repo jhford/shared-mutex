@@ -18,7 +18,7 @@ var redis = require('redis'),
              argument is set to the redis key of the mutex
 */
 function lock(redisOpts, id, timeout, callback) {
-  var client = redis.createClient.apply(undefined, redisOpts || []);
+  var client = redis.createClient.apply(redis, redisOpts || []);
   debug('Locking %s', id);
   // NX: only set if the id doesn't exist
   // EX N: have the id timeout after N seconds
@@ -55,7 +55,7 @@ function lock(redisOpts, id, timeout, callback) {
              err.  Key is returned as the id of the mutex
 */
 function unlock(redisOpts, id, callback) {
-  var client = redis.createClient.apply(undefined, redisOpts || []);
+  var client = redis.createClient.apply(redis, redisOpts || []);
   client.get(id, function(err, data) {
     if (err) {
       return callback(new Error('Error fetching id for unlock: ' + err));

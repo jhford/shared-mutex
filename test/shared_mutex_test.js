@@ -40,7 +40,7 @@ suite('shared_mutex', function() {
 
     function secondLock(err, data) {
       assert.ok(err);
-      assert.ok(-1 != err.message.indexOf('Could not claim lock for'));
+      assert.ok(-1 !== err.message.indexOf('Could not claim lock for'));
       done();
     }
 
