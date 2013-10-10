@@ -10,7 +10,7 @@ suite('shared_mutex', function() {
     redis.createClient().flushall();
   });
 
-  test('lock-success', function(done) {
+  test('lock success', function(done) {
     var id = 'mutex:testing1';
     subject.lock(null, id, null, function(err, data) {
       assert.ifError(err);
@@ -19,22 +19,23 @@ suite('shared_mutex', function() {
     });
   });
 
-  test('unlock-success', function(done) {
+  test('unlock success', function(done) {
     var id = 'mutex:testing';
+    
+    function unlockCb(err, data) {
+      assert.ifError(err);
+      assert.equal(id, data);
+      done(err);
+    }
+
     subject.lock(null, id, null, function(lockErr, lockData) {
       assert.ifError(lockErr);
       assert.equal(id, lockData);
-      subject.unlock(null, lockData,
-        function(unlockErr, unlockData) {
-          assert.ifError(unlockErr);
-          assert.equal(id, unlockData);
-          done(unlockErr);
-        }
-        );
+      subject.unlock(null, lockData, unlockCb);
     });
   });
 
-  test('actually-a-mutex', function(done) {
+  test('mutex is actually a mutex', function(done) {
     var id = 'mutex:testing';
     subject.lock(null, id, null, function(err, data) {
       assert.ifError(err);
@@ -47,7 +48,7 @@ suite('shared_mutex', function() {
     });
   });
 
-  test('double-unlock', function(done) {
+  test('double unlock', function(done) {
     var id = 'mutex:testing';
     subject.lock(null, id, null, function(lockErr, lockData) {
       assert.ifError(lockErr);
@@ -66,7 +67,7 @@ suite('shared_mutex', function() {
     });
   });
 
-  test('unlock-notlocked', function(done) {
+  test('unlock but isn\'t already locked', function(done) {
     var id = 'mutex:testing';
     subject.unlock(null, id, function(err, data) {
       assert.ifError(err);
@@ -78,72 +79,71 @@ suite('shared_mutex', function() {
   test('two-mutexs', function(done) {
     var id1 = 'mutex:testing1',
         id2 = 'mutex:testing2';
-
-  subject.lock(null, id1, null, function(err1, data1) {
-    assert.ifError(err1);
-    assert.equal(id1, data1);
-    subject.lock(null, id2, null, function(err2, data2) {
-      assert.ifError(err2);
-      assert.equal(id2, data2);
-      assert.notEqual(data1, data2);
-      done(err1 || err2);
+  
+    subject.lock(null, id1, null, function(err1, data1) {
+      assert.ifError(err1);
+      assert.equal(id1, data1);
+      subject.lock(null, id2, null, function(err2, data2) {
+        assert.ifError(err2);
+        assert.equal(id2, data2);
+        assert.notEqual(data1, data2);
+        done(err1 || err2);
+      });
     });
-  });
   });
 
   // This test is pretty ugly because it uses setTimeout
-  test('lock-with-timeout', function(done) {
+  test('lock expiration ', function(done) {
     var id = 'mutex:testing',
         timeout = 1;
 
-  subject.lock(null, id, timeout, function(err1, data1) {
-    assert.ifError(err1);
-    assert.equal(id, data1);
-    function secondCallback(err2, data2) {
-      assert.ifError(err2);
-      assert.equal(id, data2);
-      done(err2);
-    }
-    // Node doesn't guaruntee when the callback will happen,
-    // but the timeout of 20ms is only needed to ensure that
-    // there is > 1ms of overhead between two lock() calls
-    setTimeout(subject.lock, timeout * 20, null, id, null, secondCallback);
+    subject.lock(null, id, timeout, function(err1, data1) {
+      assert.ifError(err1);
+      assert.equal(id, data1);
+      function secondCallback(err2, data2) {
+        assert.ifError(err2);
+        assert.equal(id, data2);
+        done(err2);
+      }
+      // Node doesn't guaruntee when the callback will happen,
+      // but the timeout of 20ms is only needed to ensure that
+      // there is > 1ms of overhead between two lock() calls
+      setTimeout(subject.lock, timeout * 20, null, id, null, secondCallback);
+    });
   });
 
-  });
-
-  test('mutex-unlock-publishing', function(done) {
+  test('mutex publishing', function(done) {
     var id = 'mutex:testing',
         desiredMessage = id + '_unlocked',
         receiver = redis.createClient(),
         unlockCount = 0;
-
-  receiver.on('message', function(channel, message) {
-    unlockCount++;
-    assert.equal(desiredMessage, message);
-    assert.equal(id, channel);
-    if (unlockCount > 1) {
-      receiver.end();
-      done();
-    }
-  });
-
-  receiver.subscribe(id);
-
-  subject.lock(null, id, null, function(lockErr, lockData) {
-    assert.ifError(lockErr);
-    assert.equal(id, lockData);
-    subject.unlock(null, lockData,
-      function(unlockErr, unlockData) {
-        assert.ifError(unlockErr);
-        assert.equal(id, unlockData);
-        subject.unlock(null, unlockData, function(err, data) {
-          assert.ifError(err);
-          assert.equal(id, data);
-        });
+  
+    receiver.on('message', function(channel, message) {
+      unlockCount++;
+      assert.equal(desiredMessage, message);
+      assert.equal(id, channel);
+      if (unlockCount > 1) {
+        receiver.end();
+        done();
       }
-      );
-  });
+    });
+  
+    receiver.subscribe(id);
+  
+    subject.lock(null, id, null, function(lockErr, lockData) {
+      assert.ifError(lockErr);
+      assert.equal(id, lockData);
+      subject.unlock(null, lockData,
+        function(unlockErr, unlockData) {
+          assert.ifError(unlockErr);
+          assert.equal(id, unlockData);
+          subject.unlock(null, unlockData, function(err, data) {
+            assert.ifError(err);
+            assert.equal(id, data);
+          });
+        }
+        );
+    });
   });
 
 
