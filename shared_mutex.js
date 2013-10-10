@@ -17,7 +17,6 @@ var redis = require('redis'),
              If the lock is successfully obtained, the key
              argument is set to the redis key of the mutex
 */
-
 function lock(redisOpts, id, timeout, callback) {
   var client = redis.createClient.apply(undefined, redisOpts || []);
   debug('Locking %s', id);
@@ -25,7 +24,7 @@ function lock(redisOpts, id, timeout, callback) {
   // EX N: have the id timeout after N seconds
   var cmdArgs = [id, 1, 'NX'];
   if (timeout) {
-      cmdArgs.push('PX', timeout.toString(10));
+    cmdArgs.push('PX', timeout.toString(10));
   }
   function redisSetCallback(err, data) {
     client.end();
