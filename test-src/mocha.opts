@@ -1,3 +1,2 @@
 --ui tdd
---require test/helper.js
---reporter nyan
+--timeout 4s
