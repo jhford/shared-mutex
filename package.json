@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Mutex that is shared using a redis instance",
   "main": "lib/shared_mutex.js",
-  "private": true,
   "scripts": {
     "compile": "babel-compile -p node5 src:lib test-src:test",
     "pretest": "npm run compile",
